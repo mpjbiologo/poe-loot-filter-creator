@@ -13,6 +13,7 @@ describe("PoE1 syntax catalog", () => {
   it("does not expose conditions marked PoE2-only by GGG", () => {
     const names = POE1_CONDITIONS.map(item => item.name);
     for (const excluded of EXCLUDED_POE2_CONDITIONS) expect(names).not.toContain(excluded.name);
+    expect(names).not.toContain("MemoryStrands");
     expect(EXCLUDED_POE2_CONDITIONS.length).toBeGreaterThan(0);
   });
 
