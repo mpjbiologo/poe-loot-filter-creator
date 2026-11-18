@@ -33,7 +33,7 @@ export function parseFilter(source: string): ParseResult {
       root.push(current);
       return;
     }
-    if (DIRECTIVE.test(trimmed) && !current) {
+    if (DIRECTIVE.test(trimmed)) {
       root.push({ type: "directive", value: original });
       return;
     }
