@@ -35,10 +35,6 @@ function replaceRule(source: string, ruleIndex: number, transform: (rule: Rule) 
   return serializeFilter(next);
 }
 
-function ruleLines(rule: Rule): string[] {
-  return rule.lines.filter((line): line is { type: "raw"; value: string } => line.type === "raw").map(line => line.value.trim());
-}
-
 function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete }: {
   rule: Rule;
   index: number;
