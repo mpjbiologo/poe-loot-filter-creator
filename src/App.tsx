@@ -36,7 +36,7 @@ function replaceRule(source: string, ruleIndex: number, transform: (rule: Rule) 
 }
 
 function ruleLines(rule: Rule): string[] {
-  return rule.lines.filter((line): line is Extract<FilterLine, { type: "raw" }> => line.type === "raw").map(line => line.value.trim());
+  return rule.lines.filter((line): line is { type: "raw"; value: string } => line.type === "raw").map(line => line.value.trim());
 }
 
 function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete }: {
@@ -50,7 +50,6 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete 
 }) {
   const [condition, setCondition] = useState(POE1_CONDITIONS[0]?.name ?? "Class");
   const [action, setAction] = useState(POE1_ACTIONS[0]?.name ?? "SetTextColor");
-  const rawLines = ruleLines(rule);
 
   function updateLine(lineIndex: number, value: string) {
     const next = [...rule.lines];
@@ -102,6 +101,7 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete 
           }
           if (line.type === "comment") return <div className="rule-comment" key={lineIndex}>{line.value.trim()}</div>;
           if (line.type === "blank") return <div className="rule-blank" key={lineIndex} />;
+          if (line.type === "rule") return null;
           return <code key={lineIndex}>{line.value}</code>;
         })}
         {rule.lines.length === 0 && <small className="muted-note">Esta regra ainda não possui condições ou ações.</small>}
