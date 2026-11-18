@@ -1,6 +1,12 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { parseFilter, serializeFilter, type FilterLine, type RuleKind } from "./engine/filter";
 import { POE1_ACTIONS, POE1_CONDITIONS } from "./engine/catalog";
+
+const STORAGE_KEY = "poe-filter-forge-project-v1";
+
+function loadSaved(key: string, fallback: string): string {
+  try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
+}
 
 const starter = `# PoE Loot Filter Creator — Path of Exile 1
 # Regras são avaliadas na ordem em que aparecem.
@@ -121,12 +127,21 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete 
 }
 
 export default function App() {
-  const [source, setSource] = useState(starter);
-  const [filterName, setFilterName] = useState("Meu primeiro filtro");
+  const [source, setSource] = useState(() => loadSaved(`${STORAGE_KEY}:source`, starter));
+  const [filterName, setFilterName] = useState(() => loadSaved(`${STORAGE_KEY}:name`, "Meu primeiro filtro"));
   const [activeTab, setActiveTab] = useState<"visual" | "codigo">("visual");
   const fileRef = useRef<HTMLInputElement>(null);
   const parsed = useMemo(() => parseFilter(source), [source]);
   const rules = parsed.lines.filter((line): line is Rule => line.type === "rule");
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`${STORAGE_KEY}:source`, source);
+      localStorage.setItem(`${STORAGE_KEY}:name`, filterName);
+    } catch {
+      // O editor continua funcional mesmo se o navegador bloquear o armazenamento local.
+    }
+  }, [source, filterName]);
 
   function download() {
     const blob = new Blob([source], { type: "text/plain;charset=utf-8" });
