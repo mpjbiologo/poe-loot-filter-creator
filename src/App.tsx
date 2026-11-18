@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { countRules, parseFilter, serializeFilter, type FilterLine } from "./engine/filter";
+import { countRules, parseFilter, type FilterLine } from "./engine/filter";
 
 const starter = `# PoE Loot Filter Creator — Path of Exile 1
 # Regras são avaliadas na ordem em que aparecem.
