@@ -20,7 +20,6 @@ export interface ConditionDefinition {
   example: string;
 }
 
-const allOperators = ["=", "!", "!=", "<=", ">=", "<", ">", "=="] as const;
 const equalityOperators = ["=", "!", "!=", "=="] as const;
 const numericOperators = allOperators;
 
