@@ -115,7 +115,7 @@ export default function App() {
                     <span className="rule-number">REGRA {String(index + 1).padStart(2, "0")}</span>
                   </div>
                   <div className="rule-content">
-                    {rule.lines.filter(line => line.type !== "blank" && line.type !== "comment").map((line, i) => (
+                    {rule.lines.filter((line): line is Exclude<FilterLine, { type: "rule" }> => line.type !== "blank" && line.type !== "comment" && line.type !== "rule").map((line, i) => (
                       <code key={i}>{line.value}</code>
                     ))}
                     {rule.lines.length === 0 && <small>Sem condições ou ações.</small>}
