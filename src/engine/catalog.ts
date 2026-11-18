@@ -175,6 +175,7 @@ export const EXCLUDED_POE2_CONDITIONS = [
   { name: "HasVaalUniqueMod", reason: "Marcada como PoE2-only na documentação oficial." },
   { name: "IsVaalUnique", reason: "Marcada como PoE2-only na documentação oficial." },
   { name: "WaystoneTier", reason: "Marcada como PoE2-only na documentação oficial." },
+  { name: "MemoryStrands", reason: "Conceito associado aos itens de PoE2; excluído preventivamente até haver confirmação normativa de suporte em PoE1." },
 ] as const;
 
 export function findCondition(name: string): ConditionDefinition | undefined {
