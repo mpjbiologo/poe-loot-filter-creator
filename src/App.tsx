@@ -30,6 +30,55 @@ Hide
 
 type Rule = Extract<FilterLine, { type: "rule" }>;
 
+type RulePreview = {
+  textColor: string;
+  borderColor: string;
+  backgroundColor: string;
+  fontSize: number;
+  itemName: string;
+  minimap?: { size: number; color: string; shape: string };
+  effect?: string;
+};
+
+function getRulePreview(rule?: Rule): RulePreview {
+  const preview: RulePreview = {
+    textColor: "rgb(241, 209, 126)",
+    borderColor: "rgb(185, 150, 76)",
+    backgroundColor: "rgba(18, 18, 15, 0.92)",
+    fontSize: 18,
+    itemName: "Chaos Orb",
+  };
+  if (!rule) return preview;
+
+  for (const line of rule.lines) {
+    if (line.type !== "raw") continue;
+    const value = line.value.trim();
+    const color = value.match(/^(SetTextColor|SetBorderColor|SetBackgroundColor)\s+(\d+)\s+(\d+)\s+(\d+)(?:\s+(\d+))?/i);
+    if (color) {
+      const [, command, r, g, b, alpha] = color;
+      const opacity = Math.max(0, Math.min(255, Number(alpha ?? 255))) / 255;
+      const rgba = `rgba(${r}, ${g}, ${b}, ${opacity.toFixed(2)})`;
+      if (command.toLowerCase() === "settextcolor") preview.textColor = `rgb(${r}, ${g}, ${b})`;
+      if (command.toLowerCase() === "setbordercolor") preview.borderColor = `rgba(${r}, ${g}, ${b}, ${opacity.toFixed(2)})`;
+      if (command.toLowerCase() === "setbackgroundcolor") preview.backgroundColor = rgba;
+    }
+    const font = value.match(/^SetFontSize\s+(\d+)/i);
+    if (font) preview.fontSize = Math.max(1, Math.min(45, Number(font[1])));
+    const icon = value.match(/^MinimapIcon\s+(-?\d+)\s+(\w+)\s+(\w+)/i);
+    if (icon) preview.minimap = { size: Number(icon[1]), color: icon[2], shape: icon[3] };
+    const effect = value.match(/^PlayEffect\s+(\w+)/i);
+    if (effect) preview.effect = effect[1];
+    const base = value.match(/^BaseType\s+(?:=\s*)?"([^"]+)"/i);
+    const itemClass = value.match(/^Class\s+(?:=\s*)?"?([^"]+?)"?$/i);
+    const rarity = value.match(/^Rarity\s+(?:=\s*)?(Normal|Magic|Rare|Unique)/i);
+    if (base) preview.itemName = base[1];
+    else if (itemClass && /currency/i.test(itemClass[1])) preview.itemName = "Chaos Orb";
+    else if (rarity?.[1] === "Unique") preview.itemName = "Headhunter";
+    else if (rarity?.[1] === "Rare") preview.itemName = "Rare Leather Belt";
+  }
+  return preview;
+}
+
 function defaultActionArgument(actionName: string, argument: { name: string; type: string; range?: string; optional?: boolean; default?: string; values?: readonly string[] }): string {
   if (argument.default !== undefined) return argument.default;
   if (argument.values?.length) return argument.values[0];
@@ -212,7 +261,7 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete 
 export default function App() {
   const [source, setSource] = useState(() => loadSaved(`${STORAGE_KEY}:source`, starter));
   const [filterName, setFilterName] = useState(() => loadSaved(`${STORAGE_KEY}:name`, "Meu primeiro filtro"));
-  const [activeTab, setActiveTab] = useState<"visual" | "codigo">("visual");
+  const [activeTab, setActiveTab] = useState<"visual" | "codigo">("visual");\n  const [previewRuleIndex, setPreviewRuleIndex] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const parsed = useMemo(() => parseFilter(source), [source]);
   const rules = parsed.lines.filter((line): line is Rule => line.type === "rule");
@@ -347,7 +396,7 @@ export default function App() {
           ) : (
             <div className="rule-list">
               {rules.map((rule, index) => (
-                <RuleCard key={index} rule={rule} index={index} total={rules.length}
+                <RuleCard key={index} rule={rule} index={index} total={rules.length} selected={previewRuleIndex === index} onPreview={() => setPreviewRuleIndex(index)}
                   onChange={lines => updateRule(index, lines)}
                   onMove={direction => moveRule(index, direction)}
                   onDuplicate={() => duplicateRule(index)}
@@ -365,13 +414,26 @@ export default function App() {
         </section>
 
         <aside className="preview-panel">
-          <div className="panel-kicker">PRÉVIA</div><h2>Aparência no jogo</h2>
-          <p className="preview-desc">A cor do texto abaixo acompanha a primeira ação SetTextColor encontrada no filtro.</p>
+          <div className="panel-kicker">PRÉVIA EM TEMPO REAL</div><h2>Aparência da regra</h2>
+          <p className="preview-desc">{previewRule ? `Visualização da regra ${previewRuleIndex + 1}. Selecione “Ver prévia” em outra regra para comparar.` : "Adicione uma regra para visualizar sua aparência."}</p>
           <div className="game-preview">
-            <div className="preview-scene"><span className="scene-label">WRAECLAST · DROP PREVIEW</span><div className="loot-item currency" style={{ color: previewTextColor }}><i>✧</i><b>Chaos Orb</b></div><div className="loot-item unique"><i>◆</i><b>Headhunter</b></div><div className="loot-item rare"><i>◇</i><b>Rare Leather Belt</b></div></div>
+            <div className="preview-scene">
+              <span className="scene-label">WRAECLAST · ITEM DROP</span>
+              {rulePreview.effect && <span className={`preview-beam effect-${rulePreview.effect.toLowerCase()}`}>{rulePreview.effect} effect</span>}
+              <div className="loot-item live-loot" style={{ color: rulePreview.textColor, borderColor: rulePreview.borderColor, backgroundColor: rulePreview.backgroundColor, fontSize: `${rulePreview.fontSize}px` }}>
+                {rulePreview.minimap && rulePreview.minimap.size >= 0 && <i className="preview-minimap" title={`MinimapIcon ${rulePreview.minimap.size} ${rulePreview.minimap.color} ${rulePreview.minimap.shape}`}>◆</i>}
+                <b>{rulePreview.itemName}</b>
+              </div>
+            </div>
           </div>
-          <div className="legend"><span><i className="dot gold" /> Moeda</span><span><i className="dot orange" /> Único</span><span><i className="dot yellow" /> Raro</span></div>
-          <div className="preview-tip"><b>Sobre a prévia</b><p>Esta representação é ilustrativa. A simulação completa de itens e correspondência das regras será implementada em uma próxima etapa.</p></div>
+          <div className="preview-specs">
+            <span><i style={{background:rulePreview.textColor}} /> Texto</span>
+            <span><i style={{background:rulePreview.borderColor}} /> Borda</span>
+            <span><i style={{background:rulePreview.backgroundColor}} /> Fundo</span>
+            <span>Fonte: {rulePreview.fontSize}px</span>
+            {rulePreview.minimap && <span>Minimapa: {rulePreview.minimap.color} · {rulePreview.minimap.shape}</span>}
+          </div>
+          <div className="preview-tip"><b>Prévia ilustrativa</b><p>A imagem representa as ações visuais configuradas na regra selecionada. A correspondência real de itens e a renderização exata do jogo ainda dependem da validação no PoE1.</p></div>
         </aside>
       </section>
       <footer><span>POE FILTER FORGE <i>·</i> FEITO PARA A COMUNIDADE</span><span>Path of Exile é uma marca da Grinding Gear Games.</span></footer>
