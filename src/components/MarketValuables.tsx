@@ -105,7 +105,7 @@ export default function MarketValuables({ source, setSource }: {
     } finally { setLoading(false); }
   }
 
-  const selectedItems = useMemo(() => items.filter(item => selected.includes(item.id)), [items, selected]);
+  const selectedItems = useMemo(() => items.filter(item => selected.includes(item.id) && item.chaosValue >= (Number(minimum) || 0)), [items, selected, minimum]);
   const visibleItems = useMemo(() => items.filter(item =>
     item.name.toLowerCase().includes(search.toLowerCase()) &&
     item.chaosValue >= (Number(minimum) || 0)
