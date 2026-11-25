@@ -264,7 +264,8 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete,
 export default function App() {
   const [source, setSource] = useState(() => loadSaved(`${STORAGE_KEY}:source`, starter));
   const [filterName, setFilterName] = useState(() => loadSaved(`${STORAGE_KEY}:name`, "Meu primeiro filtro"));
-  const [activeTab, setActiveTab] = useState<"visual" | "codigo">("visual");\n  const [previewRuleIndex, setPreviewRuleIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState<"visual" | "codigo">("visual");
+  const [previewRuleIndex, setPreviewRuleIndex] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   const parsed = useMemo(() => parseFilter(source), [source]);
   const rules = parsed.lines.filter((line): line is Rule => line.type === "rule");
