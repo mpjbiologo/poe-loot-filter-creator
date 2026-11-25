@@ -38,3 +38,33 @@
 .preset-library>small{display:block;color:#8f8879;font-size:9px;line-height:1.5}
 @media(max-width:820px){.preset-heading{align-items:stretch;flex-direction:column}.preset-controls{width:100%}.preset-controls select{flex:1;min-width:0;max-width:none}}
 @media(max-width:480px){.preset-controls{flex-direction:column}.preset-controls .button{width:100%}}
+
+/* poe.ninja market-value rule builder */
+.market-valuables{margin:0 0 18px;padding:15px;background:linear-gradient(145deg,#211f18,#171714);border:1px solid #806b42;box-shadow:inset 0 0 24px #c99a2810}
+.market-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.market-head h3{font:600 16px 'Playfair Display',serif;color:#f0dfbd;margin:5px 0 0}
+.market-head a{font:9px 'DM Mono',monospace;color:#d7b978;text-decoration:none}
+.market-head a:hover{text-decoration:underline}
+.market-valuables>p{font-size:10px;line-height:1.55;color:#aaa18e;margin:10px 0}
+.market-load-row{display:flex;gap:8px}
+.market-load-row select,.market-settings select,.market-settings input,.market-list-toolbar input{min-width:0;background:#11110f;border:1px solid #514733;color:#e4d8c3;padding:8px 9px;font:10px 'DM Mono',monospace}
+.market-load-row select{flex:1}
+.market-settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:11px 0}
+.market-settings label{display:grid;gap:5px;color:#b7aa92;font:9px 'DM Mono',monospace}
+.market-settings input,.market-settings select{width:100%}
+.market-error,.market-status{font-size:10px;line-height:1.5;padding:8px 10px;background:#241e16;border-left:2px solid #d58b73;color:#e6b59b}
+.market-status{border-color:#9cbd7a;color:#b8d3a2}
+.market-list-toolbar{display:flex;align-items:center;gap:7px;margin:10px 0}
+.market-list-toolbar input{flex:1;width:100%}
+.market-list-toolbar>span{font:9px 'DM Mono',monospace;color:#d4c29d;white-space:nowrap}
+.market-items{max-height:240px;overflow:auto;border:1px solid #39352b;background:#11110f}
+.market-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-bottom:1px solid #29271f;cursor:pointer}
+.market-item:last-child{border-bottom:0}
+.market-item:hover{background:#242219}
+.market-item input{accent-color:#d6ad63}
+.market-item-name{display:grid;gap:2px;flex:1;color:#e8dfcc;font-size:10px}
+.market-item-name small{color:#817b6d;font:8px 'DM Mono',monospace}
+.market-item>b{color:#eacb86;font:10px 'DM Mono',monospace}
+.market-add-button{width:100%;margin-top:9px}
+.market-footnote{display:block;color:#827b6c;font-size:8px;line-height:1.55;margin-top:10px}
+@media(max-width:560px){.market-settings{grid-template-columns:repeat(2,minmax(0,1fr))}.market-head{align-items:flex-start}.market-list-toolbar{flex-wrap:wrap}.market-list-toolbar input{flex-basis:100%}.market-list-toolbar .mini-add{flex:1}}
