@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { parseFilter, serializeFilter, type FilterLine, type RuleKind } from "./engine/filter";
 import { POE1_ACTIONS, POE1_CONDITIONS } from "./engine/catalog";
 import { POE1_PRESETS } from "./engine/presets";
+import MarketValuables from "./components/MarketValuables";
 
 const STORAGE_KEY = "poe-filter-forge-project-v1";
 
@@ -415,6 +416,7 @@ export default function App() {
             <p>{selectedPreset.description}</p>
             <small>{selectedPreset.useCase} Ao carregar, o conteúdo atual do editor será substituído; depois, você poderá personalizar e exportar.</small>
           </section>
+          <MarketValuables source={source} setSource={setSource} />
           {activeTab === "codigo" ? (
             <div className="code-wrap">
               <div className="code-toolbar"><span>● SINTAXE DE FILTRO POE1</span><span>{source.split("\n").length} linhas</span></div>
