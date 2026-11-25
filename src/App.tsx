@@ -339,8 +339,8 @@ export default function App() {
     })));
   }
 
-  const sampleStyle = source.match(/SetTextColor\s+(\d+)\s+(\d+)\s+(\d+)/i);
-  const previewTextColor = sampleStyle ? `rgb(${sampleStyle[1]}, ${sampleStyle[2]}, ${sampleStyle[3]})` : "#f1d17e";
+  const previewRule = rules[previewRuleIndex];
+  const rulePreview = getRulePreview(previewRule);
 
   return (
     <main className="app-shell">
