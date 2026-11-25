@@ -128,3 +128,21 @@
 .currency-dot{background:#f1d17e}.unique-dot{background:#e4a06a}.rare-dot{background:#e7d477}.map-dot{background:#b8a56a}.gem-dot{background:#80d8cf}.card-dot{background:#e5d4b3}
 @media(max-width:760px){.preview-inspector-grid{grid-template-columns:1fr}.expanded-preview-scene{height:330px}.drop-currency{left:31%;top:42%}.drop-unique{left:4%;top:19%}.drop-map{right:3%;top:25%}.drop-gem{left:4%;bottom:17%}.drop-card{right:3%;bottom:17%}.drop-rare{left:35%;bottom:8%}.sample-loot{font-size:9px!important;padding:5px 6px}.expanded-beam{left:31%;top:calc(42% - 30px)}.scene-coordinate{top:34px;left:10px;right:auto;font-size:7px}.preview-mode-row{align-items:flex-start;flex-direction:column}}
 @media(max-width:420px){.expanded-preview-scene{height:300px}.sample-loot{font-size:8px!important}.drop-currency{left:24%}.expanded-beam{left:24%}.scene-sound-indicator{font-size:7px}}
+
+.preview-item-gallery{margin-top:15px;padding:14px;background:#151512;border:1px solid #38352b}
+.preview-item-gallery>p{font-size:9px;line-height:1.55;color:#918b7d;margin:-4px 0 12px}
+.preview-item-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.preview-item-tile{min-width:0;display:grid;gap:5px;padding:9px 10px;background:#11110f;border:1px solid #454031;border-left:3px solid #8d805f}
+.preview-item-tile span{font:8px 'DM Mono',monospace;color:#8f8879;text-transform:uppercase;letter-spacing:.6px}
+.preview-item-tile b{font:10px 'DM Mono',monospace;color:#d7cbb5;overflow-wrap:anywhere}
+.tile-currency{border-left-color:#d9b75f}.tile-currency b{color:#f1d17e}
+.tile-card{border-left-color:#c2a77c}.tile-card b{color:#e5d4b3}
+.tile-unique{border-left-color:#bd7846}.tile-unique b{color:#e9a56c}
+.tile-rare{border-left-color:#b4a44c}.tile-rare b{color:#e8dc7d}
+.tile-magic{border-left-color:#4d8fc4}.tile-magic b{color:#86c6f4}
+.tile-blue{border-left-color:#568eb3}.tile-blue b{color:#8ac4e8}
+.tile-map{border-left-color:#a99555}.tile-map b{color:#e2cf91}
+.tile-gem{border-left-color:#4aaba2}.tile-gem b{color:#80d8cf}
+.tile-normal{border-left-color:#999}.tile-normal b{color:#ddd}
+@media(max-width:900px){.preview-item-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:560px){.preview-item-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.preview-item-gallery{padding:10px}}
