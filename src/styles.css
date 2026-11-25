@@ -13,3 +13,17 @@
 @media(max-width:720px){.builder-heading{align-items:flex-start;flex-direction:column;gap:3px}.action-argument{grid-template-columns:85px minmax(0,1fr)}.builder-row .operator-select{flex-basis:62px}}
 
 .color-picker-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 9px;background:#151510;border:1px solid #38352b}.color-picker-row>label{font-size:10px;color:#aaa394}.color-picker-row>div{display:flex;align-items:center;gap:8px}.color-picker-row input[type=color]{width:35px;height:27px;padding:2px;background:#11110f;border:1px solid #514733;cursor:pointer}.color-picker-row code{font:10px 'DM Mono',monospace;color:#d6c5a3}
+
+/* Live preview tied to the selected rule */
+.rule-card.selected{border-color:#927448;box-shadow:0 0 0 1px #92744835}
+.preview-rule-button{border:1px solid #554832;background:#29251d;color:#cdb58d;padding:5px 8px;font:9px 'DM Mono',monospace;cursor:pointer}
+.preview-rule-button:hover,.preview-rule-button[aria-pressed="true"]{border-color:var(--gold);color:#f0d5a4;background:#383022}
+.preview-panel{position:sticky;top:16px}
+.live-loot{max-width:100%;min-height:40px;max-width:calc(100% - 16px);text-align:center;overflow-wrap:anywhere;box-shadow:0 4px 18px #000b,0 0 18px #0008}
+.preview-specs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;color:#aaa394;font:9px 'DM Mono',monospace}
+.preview-specs span{display:flex;align-items:center;gap:5px;padding:5px 7px;background:#22211b;border:1px solid #39352b}
+.preview-specs i{width:9px;height:9px;border:1px solid #777;border-radius:2px;display:inline-block}
+.preview-beam{position:absolute;top:42px;z-index:2;font:9px 'DM Mono',monospace;text-shadow:0 1px 5px #000;padding:4px 7px;border-radius:2px}
+.effect-red{color:#ff6969}.effect-green{color:#8ddc82}.effect-blue{color:#80baff}.effect-purple{color:#c49aff}.effect-white{color:#fff}.effect-yellow{color:#ffe27a}.effect-orange{color:#ffb15f}
+.preview-minimap{font-size:.9em;color:#f4d27f;text-shadow:0 0 8px currentColor}
+@media(max-width:1100px){.preview-panel{position:static}}
