@@ -102,7 +102,6 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete 
     onChange([...rule.lines, { type: "raw", value: "    " + actionDefinition.name + (args.length ? " " + args.join(" ") : "") }]);
   }
 
-  const conditionNeedsValue = conditionDefinition?.valueKind !== "boolean" || true;
   return (
     <article className="rule-card">
       <div className="rule-card-head">
