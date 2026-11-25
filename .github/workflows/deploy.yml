@@ -25,6 +25,12 @@ jobs:
       - run: npm install
       - run: npm test
       - run: npm run build
+      - name: Verify production entrypoint
+        run: |
+          test -f dist/index.html
+          grep -q '/poe-loot-filter-creator/assets/' dist/index.html
+          ! grep -q '/src/main.tsx' dist/index.html
+          test -n "$(find dist/assets -maxdepth 1 -type f -name '*.js' -print -quit)"
       - uses: actions/configure-pages@v5
         with:
           enablement: true
