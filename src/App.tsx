@@ -57,6 +57,8 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete 
   const [actionValues, setActionValues] = useState<string[]>([]);
   const conditionDefinition = POE1_CONDITIONS.find(item => item.name === condition);
   const actionDefinition = POE1_ACTIONS.find(item => item.name === action);
+  const isColorAction = ["SetTextColor", "SetBorderColor", "SetBackgroundColor"].includes(action);
+  const colorHex = "#" + [0, 1, 2].map(i => Math.max(0, Math.min(255, Number(actionValues[i] ?? 0) || 0)).toString(16).padStart(2, "0")).join("");
 
   useEffect(() => {
     if (!conditionDefinition) return;
@@ -173,6 +175,16 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete 
               )}
             </div>
           ))}
+          {isColorAction && (
+            <div className="color-picker-row">
+              <label htmlFor={"action-color-" + index}>Seletor visual de cor</label>
+              <div><input id={"action-color-" + index} type="color" value={colorHex} onChange={event => {
+                const hex = event.target.value;
+                const rgb = [1, 3, 5].map(offset => String(parseInt(hex.slice(offset, offset + 2), 16)));
+                setActionValues(values => values.map((value, i) => i < 3 ? rgb[i] : value));
+              }} /><code>{colorHex.toUpperCase()}</code></div>
+            </div>
+          )}
           <div className="builder-row action-submit">
             <button className="mini-add" onClick={addAction} disabled={!!actionDefinition?.arguments.some((argument, i) => !argument.optional && !(actionValues[i] ?? "").trim())}>＋ Adicionar ação</button>
           </div>
