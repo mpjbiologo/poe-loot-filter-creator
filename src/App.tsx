@@ -30,6 +30,21 @@ Hide
 
 type Rule = Extract<FilterLine, { type: "rule" }>;
 
+function defaultActionArgument(actionName: string, argument: { name: string; type: string; range?: string; optional?: boolean; default?: string; values?: readonly string[] }): string {
+  if (argument.default !== undefined) return argument.default;
+  if (argument.values?.length) return argument.values[0];
+  if (argument.type !== "number") return "";
+  const name = argument.name.toLowerCase();
+  if (name === "id") return "1";
+  if (name === "volume") return "100";
+  if (name === "alpha") return "255";
+  if (["red", "green", "blue"].includes(name)) return "255";
+  if (actionName === "SetFontSize") return "30";
+  if (actionName === "MinimapIcon" && name === "size") return "2";
+  const minimum = argument.range?.match(/-?\d+/)?.[0];
+  return minimum ?? "1";
+}
+
 function replaceRule(source: string, ruleIndex: number, transform: (rule: Rule) => Rule): string {
   const parsed = parseFilter(source);
   let seen = -1;
@@ -68,7 +83,7 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete 
 
   useEffect(() => {
     if (!actionDefinition) return;
-    setActionValues(actionDefinition.arguments.map(argument => argument.default ?? argument.values?.[0] ?? (argument.type === "number" ? "100" : "")));
+    setActionValues(actionDefinition.arguments.map(argument => defaultActionArgument(actionDefinition.name, argument)));
   }, [action]);
 
   function updateLine(lineIndex: number, value: string) {
