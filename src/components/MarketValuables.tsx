@@ -44,15 +44,15 @@ function makeValuableRule(item: ValuableItem, settings: {
   const [r, g, b] = colors[settings.minimapColor] ?? colors.Yellow;
   const text = item.chaosValue >= 100 ? [255, 235, 150] : item.chaosValue >= 20 ? [255, 190, 100] : [230, 210, 150];
   const border = item.chaosValue >= 100 ? [255, 190, 70] : item.chaosValue >= 20 ? [230, 145, 65] : [180, 150, 90];
-  const effectLine = settings.effect === "None" ? "" : "    PlayEffect " + settings.effect + " Temp\\n";
-  const soundLine = settings.sound === 0 ? "" : "    PlayAlertSound " + settings.sound + " " + settings.volume + "\\n";
-  const minimapLine = "    MinimapIcon " + (item.chaosValue >= 100 ? 2 : 1) + " " + settings.minimapColor + " Star\\n";
-  return "# poe.ninja · " + item.chaosValue.toFixed(1) + " chaos · " + item.category + "\\n" +
-    "Show\\n    BaseType " + quoteFilter(item.name) + "\\n" +
-    "    SetTextColor " + text.join(" ") + "\\n" +
-    "    SetBorderColor " + border.join(" ") + "\\n" +
-    "    SetBackgroundColor 35 25 12 235\\n" +
-    "    SetFontSize " + settings.fontSize + "\\n" +
+  const effectLine = settings.effect === "None" ? "" : "    PlayEffect " + settings.effect + " Temp\n";
+  const soundLine = settings.sound === 0 ? "" : "    PlayAlertSound " + settings.sound + " " + settings.volume + "\n";
+  const minimapLine = "    MinimapIcon " + (item.chaosValue >= 100 ? 2 : 1) + " " + settings.minimapColor + " Star\n";
+  return "# poe.ninja · " + item.chaosValue.toFixed(1) + " chaos · " + item.category + "\n" +
+    "Show\n    BaseType " + quoteFilter(item.name) + "\n" +
+    "    SetTextColor " + text.join(" ") + "\n" +
+    "    SetBorderColor " + border.join(" ") + "\n" +
+    "    SetBackgroundColor 35 25 12 235\n" +
+    "    SetFontSize " + settings.fontSize + "\n" +
     soundLine + effectLine + minimapLine;
 }
 
@@ -118,16 +118,16 @@ export default function MarketValuables({ source, setSource }: {
 
   function addSelected() {
     if (!selectedItems.length) return;
-    const existing = new Set(Array.from(source.matchAll(/^\\s*BaseType\\s+"((?:[^"\\\\]|\\\\.)*)"/gim), match => match[1].replace(/\\\\(["\\\\])/g, "$1").toLowerCase()));
+    const existing = new Set(Array.from(source.matchAll(/^\s*BaseType\s+"((?:[^"\\]|\\.)*)"/gim), match => match[1].replace(/\\(["\\])/g, "$1").toLowerCase()));
     const fresh = selectedItems.filter(item => !existing.has(item.name.toLowerCase()));
     if (!fresh.length) { setStatus("Os itens selecionados já possuem regras no filtro."); return; }
     const block = fresh.map(item => makeValuableRule(item, {
       sound: Number(sound), volume: Math.max(0, Math.min(300, Number(volume) || 0)),
       effect, minimapColor, fontSize: Math.max(18, Math.min(45, Number(fontSize) || 38)),
-    })).join("\\n");
-    const firstRule = source.search(/^(?:Show|Hide|Minimal)\\s*$/im);
-    const insertion = firstRule < 0 ? source.trimEnd() + (source.trim() ? "\\n\\n" : "") + block
-      : source.slice(0, firstRule).trimEnd() + (source.slice(0, firstRule).trim() ? "\\n\\n" : "") + block + "\\n\\n" + source.slice(firstRule);
+    })).join("\n");
+    const firstRule = source.search(/^(?:Show|Hide|Minimal)\s*$/im);
+    const insertion = firstRule < 0 ? source.trimEnd() + (source.trim() ? "\n\n" : "") + block
+      : source.slice(0, firstRule).trimEnd() + (source.slice(0, firstRule).trim() ? "\\n\\n" : "") + block + "\n\n" + source.slice(firstRule);
     setSource(insertion);
     setStatus(fresh.length + " regra(s) adicionada(s). Edite-as no editor visual ou na aba Código.");
   }
