@@ -499,6 +499,15 @@ export default function App() {
             <div className="preview-capabilities"><span>✓ Texto e tamanho</span><span>✓ Cor da borda</span><span>✓ Cor e transparência do fundo</span><span>✓ Som de alerta</span><span>✓ Feixe colorido</span><span>✓ Ícone no minimapa</span><span>✓ Prioridade pela ordem das regras</span></div>
           </section>
           <div className="preview-sample-legend"><b>OUTROS TIPOS DE DROP NA CENA</b><span><i className="legend-dot currency-dot"/> Moeda</span><span><i className="legend-dot unique-dot"/> Único</span><span><i className="legend-dot rare-dot"/> Raro / base</span><span><i className="legend-dot map-dot"/> Mapa</span><span><i className="legend-dot gem-dot"/> Gema</span><span><i className="legend-dot card-dot"/> Carta</span></div>
+          <section className="preview-item-gallery">
+            <div className="inspector-title">BIBLIOTECA DE AMOSTRAS · TIPOS DE DROP DO POE1</div>
+            <p>Referências visuais para conferir como diferentes famílias de itens podem ser destacadas. A regra selecionada é aplicada à amostra principal acima; estas amostras demonstram categorias e raridades.</p>
+            <div className="preview-item-grid">
+              {[
+                ["Moeda","Divine Orb","currency"],["Fragmento","Mortal Fragment","currency"],["Carta","The Apothecary","card"],["Scarab","Gilded Scarab","rare"],["Essência","Essence of Horror","blue"],["Fóssil","Aetheric Fossil","blue"],["Ressonador","Prime Chaotic Resonator","blue"],["Mapa","Crimson Temple Map","map"],["Mapa único","The Vinktar Square","unique"],["Único","Headhunter","unique"],["Raro","Vaal Regalia","rare"],["Mágico","Superior Iron Ring","magic"],["Normal","Glassblower's Bauble","normal"],["Gema","Awakened Support","gem"],["Frasco","Quicksilver Flask","blue"],["Base","Spine Bow","normal"],["Jóia","Large Cluster Jewel","rare"],["Incubadora","Diviner's Incubator","card"],["Óleo","Golden Oil","currency"],["Orbe delirium","Fine Delirium Orb","card"]
+              ].map(([category,name,style]) => <div className={`preview-item-tile tile-${style}`} key={category}><span>{category}</span><b>{name}</b></div>)}
+            </div>
+          </section>
           <div className="preview-tip"><b>Limite técnico da prévia</b><p>A cena é uma simulação de interface, não reproduz o motor gráfico nem os sons originais do Path of Exile. O editor lê as diretivas reconhecidas do filtro; filtros importados podem conter condições e ações ainda não interpretadas pela prévia. A aparência final, os ícones e os alertas devem ser conferidos no jogo.</p></div>
         </aside>
       </section>
