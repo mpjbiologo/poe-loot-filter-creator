@@ -51,7 +51,23 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete 
   onDelete: () => void;
 }) {
   const [condition, setCondition] = useState(POE1_CONDITIONS[0]?.name ?? "Class");
+  const [conditionOperator, setConditionOperator] = useState("=");
+  const [conditionValue, setConditionValue] = useState("Currency");
   const [action, setAction] = useState(POE1_ACTIONS[0]?.name ?? "SetTextColor");
+  const [actionValues, setActionValues] = useState<string[]>([]);
+  const conditionDefinition = POE1_CONDITIONS.find(item => item.name === condition);
+  const actionDefinition = POE1_ACTIONS.find(item => item.name === action);
+
+  useEffect(() => {
+    if (!conditionDefinition) return;
+    setConditionOperator(conditionDefinition.operators[0] ?? "=");
+    setConditionValue(conditionDefinition.values?.[0] ?? (conditionDefinition.valueKind === "number" ? "1" : conditionDefinition.valueKind === "boolean" ? "True" : ""));
+  }, [condition]);
+
+  useEffect(() => {
+    if (!actionDefinition) return;
+    setActionValues(actionDefinition.arguments.map(argument => argument.default ?? argument.values?.[0] ?? (argument.type === "number" ? "100" : "")));
+  }, [action]);
 
   function updateLine(lineIndex: number, value: string) {
     const next = [...rule.lines];
@@ -67,17 +83,26 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete 
   }
 
   function addCondition() {
-    const definition = POE1_CONDITIONS.find(item => item.name === condition);
-    if (!definition) return;
-    onChange([...rule.lines, { type: "raw", value: "    " + definition.example }]);
+    if (!conditionDefinition || !conditionValue.trim()) return;
+    const value = conditionDefinition.valueKind === "text"
+      ? '"' + conditionValue.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"'
+      : conditionValue.trim();
+    onChange([...rule.lines, { type: "raw", value: "    " + conditionDefinition.name + " " + conditionOperator + (conditionDefinition.valueKind === "boolean" || conditionDefinition.valueKind === "enum" ? " " : " ") + value }]);
   }
 
   function addAction() {
-    const definition = POE1_ACTIONS.find(item => item.name === action);
-    if (!definition) return;
-    onChange([...rule.lines, { type: "raw", value: "    " + definition.example }]);
+    if (!actionDefinition) return;
+    const args = actionDefinition.arguments.map((argument, i) => {
+      const value = (actionValues[i] ?? "").trim();
+      if (!value && argument.optional) return "";
+      if (argument.type === "file path") return '"' + value.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
+      return value;
+    }).filter(Boolean);
+    if (actionDefinition.arguments.some((argument, i) => !argument.optional && !(actionValues[i] ?? "").trim())) return;
+    onChange([...rule.lines, { type: "raw", value: "    " + actionDefinition.name + (args.length ? " " + args.join(" ") : "") }]);
   }
 
+  const conditionNeedsValue = conditionDefinition?.valueKind !== "boolean" || true;
   return (
     <article className="rule-card">
       <div className="rule-card-head">
@@ -109,18 +134,50 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete 
         {rule.lines.length === 0 && <small className="muted-note">Esta regra ainda não possui condições ou ações.</small>}
       </div>
       <div className="rule-builder">
-        <div className="builder-row">
-          <select aria-label="Selecionar condição" value={condition} onChange={event => setCondition(event.target.value)}>
-            {POE1_CONDITIONS.map(item => <option key={item.name} value={item.name}>{item.name}</option>)}
-          </select>
-          <button className="mini-add" onClick={addCondition}>＋ Condição</button>
-        </div>
-        <div className="builder-row">
-          <select aria-label="Selecionar ação" value={action} onChange={event => setAction(event.target.value)}>
-            {POE1_ACTIONS.map(item => <option key={item.name} value={item.name}>{item.name}</option>)}
-          </select>
-          <button className="mini-add" onClick={addAction}>＋ Ação</button>
-        </div>
+        <section className="builder-section">
+          <div className="builder-heading"><b>CONDIÇÃO</b><span>{conditionDefinition?.description}</span></div>
+          <div className="builder-row">
+            <select aria-label="Selecionar condição" value={condition} onChange={event => setCondition(event.target.value)}>
+              {POE1_CONDITIONS.map(item => <option key={item.name} value={item.name}>{item.name}</option>)}
+            </select>
+            <select className="operator-select" aria-label="Operador da condição" value={conditionOperator} onChange={event => setConditionOperator(event.target.value)}>
+              {(conditionDefinition?.operators ?? ["="]).map(operator => <option key={operator} value={operator}>{operator}</option>)}
+            </select>
+          </div>
+          <div className="builder-row value-row">
+            {conditionDefinition?.values ? (
+              <select aria-label="Valor da condição" value={conditionValue} onChange={event => setConditionValue(event.target.value)}>
+                {conditionDefinition.values.map(value => <option key={value} value={value}>{value}</option>)}
+              </select>
+            ) : (
+              <input aria-label="Valor da condição" type={conditionDefinition?.valueKind === "number" ? "number" : "text"} min={conditionDefinition?.numericRange?.[0]} max={conditionDefinition?.numericRange?.[1]} placeholder={conditionDefinition?.valueKind === "number" ? "Informe um número" : conditionDefinition?.valueKind === "socket-pattern" ? "Ex.: 5GGG" : "Informe o valor"} value={conditionValue} onChange={event => setConditionValue(event.target.value)} />
+            )}
+            <button className="mini-add" onClick={addCondition} disabled={!conditionValue.trim()}>＋ Adicionar condição</button>
+          </div>
+        </section>
+        <section className="builder-section">
+          <div className="builder-heading"><b>AÇÃO</b><span>{actionDefinition?.description}</span></div>
+          <div className="builder-row">
+            <select aria-label="Selecionar ação" value={action} onChange={event => setAction(event.target.value)}>
+              {POE1_ACTIONS.map(item => <option key={item.name} value={item.name}>{item.name}</option>)}
+            </select>
+          </div>
+          {actionDefinition?.arguments.map((argument, argumentIndex) => (
+            <div className="action-argument" key={argument.name}>
+              <label>{argument.name}{argument.optional ? " (opcional)" : ""}{argument.range ? <small> · {argument.range}</small> : ""}</label>
+              {argument.values ? (
+                <select aria-label={argument.name} value={actionValues[argumentIndex] ?? ""} onChange={event => setActionValues(values => values.map((value, i) => i === argumentIndex ? event.target.value : value))}>
+                  {argument.values.map(value => <option key={value} value={value}>{value}</option>)}
+                </select>
+              ) : (
+                <input aria-label={argument.name} type={argument.type === "number" ? "number" : "text"} value={actionValues[argumentIndex] ?? ""} placeholder={argument.type === "file path" ? "Nome do arquivo" : argument.default ?? argument.name} onChange={event => setActionValues(values => values.map((value, i) => i === argumentIndex ? event.target.value : value))} />
+              )}
+            </div>
+          ))}
+          <div className="builder-row action-submit">
+            <button className="mini-add" onClick={addAction} disabled={!!actionDefinition?.arguments.some((argument, i) => !argument.optional && !(actionValues[i] ?? "").trim())}>＋ Adicionar ação</button>
+          </div>
+        </section>
       </div>
     </article>
   );
