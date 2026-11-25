@@ -1,0 +1,104 @@
+name: Refresh poe.ninja market snapshot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/refresh-market-data.yml"
+  schedule:
+    - cron: "7,27,47 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: poe-ninja-market-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout market-data branch
+        uses: actions/checkout@v4
+        with:
+          ref: market-data
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Fetch economy data from poe.ninja
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync, existsSync } from "node:fs";
+
+          const file = "poe-ninja-market.json";
+          const previous = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : {};
+          const previousResponses = previous.apiResponses ?? {};
+          const headers = {
+            Accept: "application/json",
+            "User-Agent": "POE-Filter-Forge/0.1.0 (https://github.com/mpjbiologo/poe-loot-filter-creator)"
+          };
+
+          async function getJson(key, url) {
+            const requestHeaders = { ...headers };
+            if (previousResponses[key]?.etag) requestHeaders["If-None-Match"] = previousResponses[key].etag;
+            const response = await fetch(url, { headers: requestHeaders });
+            if (response.status === 304 && previousResponses[key]?.data) {
+              return previousResponses[key];
+            }
+            if (!response.ok) throw new Error(`poe.ninja ${key}: HTTP ${response.status}`);
+            return { etag: response.headers.get("etag"), data: await response.json() };
+          }
+
+          const leaguesResponse = await getJson("leagues", "https://poe.ninja/poe1/api/economy/leagues");
+          const leagues = leaguesResponse.data;
+          if (!Array.isArray(leagues) || leagues.length === 0) throw new Error("poe.ninja não retornou ligas ativas.");
+          const league = leagues.find(entry => /covens/i.test(entry.id + " " + entry.name)) ?? leagues[0];
+
+          const base = "https://poe.ninja/poe1/api/economy/stash/current/currency/overview";
+          const [currencyResponse, fragmentResponse] = await Promise.all([
+            getJson("currency", base + "?league=" + encodeURIComponent(league.id) + "&type=Currency"),
+            getJson("fragment", base + "?league=" + encodeURIComponent(league.id) + "&type=Fragment")
+          ]);
+
+          const normalize = (lines, category) => (lines ?? []).map(line => ({
+            id: category + ":" + line.currencyTypeName,
+            name: line.currencyTypeName,
+            chaosValue: Number(line.chaosEquivalent) || 0,
+            category
+          })).filter(item => item.name && Number.isFinite(item.chaosValue));
+
+          const items = [
+            ...normalize(currencyResponse.data.lines, "Currency"),
+            ...normalize(fragmentResponse.data.lines, "Fragment")
+          ].sort((a, b) => b.chaosValue - a.chaosValue);
+
+          const snapshot = {
+            schemaVersion: 1,
+            generatedAt: new Date().toISOString(),
+            league: { id: league.id, name: league.name },
+            items,
+            apiResponses: {
+              leagues: leaguesResponse,
+              currency: currencyResponse,
+              fragment: fragmentResponse
+            }
+          };
+          writeFileSync(file, JSON.stringify(snapshot, null, 2) + "\n");
+          console.log(`Snapshot atualizado: ${items.length} itens · ${league.name}`);
+          NODE
+      - name: Publish snapshot to market-data branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add poe-ninja-market.json
+          if git diff --cached --quiet; then
+            echo "Sem alterações nos dados de mercado."
+            exit 0
+          fi
+          git commit -m "chore: refresh poe.ninja market snapshot"
+          git push origin HEAD:market-data
