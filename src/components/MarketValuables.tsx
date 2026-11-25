@@ -37,11 +37,6 @@ function quoteFilter(value: string): string {
 function makeValuableRule(item: ValuableItem, settings: {
   sound: number; volume: number; effect: string; minimapColor: string; fontSize: number;
 }): string {
-  const colors: Record<string, [number, number, number]> = {
-    Yellow: [255, 230, 100], Orange: [255, 160, 70], Red: [255, 90, 90],
-    Green: [100, 255, 130], Blue: [100, 180, 255], Purple: [210, 130, 255], White: [255, 255, 255],
-  };
-  const [r, g, b] = colors[settings.minimapColor] ?? colors.Yellow;
   const text = item.chaosValue >= 100 ? [255, 235, 150] : item.chaosValue >= 20 ? [255, 190, 100] : [230, 210, 150];
   const border = item.chaosValue >= 100 ? [255, 190, 70] : item.chaosValue >= 20 ? [230, 145, 65] : [180, 150, 90];
   const effectLine = settings.effect === "None" ? "" : "    PlayEffect " + settings.effect + " Temp\n";
@@ -127,7 +122,7 @@ export default function MarketValuables({ source, setSource }: {
     })).join("\n");
     const firstRule = source.search(/^(?:Show|Hide|Minimal)\s*$/im);
     const insertion = firstRule < 0 ? source.trimEnd() + (source.trim() ? "\n\n" : "") + block
-      : source.slice(0, firstRule).trimEnd() + (source.slice(0, firstRule).trim() ? "\\n\\n" : "") + block + "\n\n" + source.slice(firstRule);
+      : source.slice(0, firstRule).trimEnd() + (source.slice(0, firstRule).trim() ? "\n\n" : "") + block + "\n\n" + source.slice(firstRule);
     setSource(insertion);
     setStatus(fresh.length + " regra(s) adicionada(s). Edite-as no editor visual ou na aba Código.");
   }
