@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { parseFilter, serializeFilter, type FilterLine, type RuleKind } from "./engine/filter";
 import { POE1_ACTIONS, POE1_CONDITIONS } from "./engine/catalog";
+import { POE1_PRESETS } from "./engine/presets";
 
 const STORAGE_KEY = "poe-filter-forge-project-v1";
 
@@ -266,6 +267,8 @@ export default function App() {
   const [filterName, setFilterName] = useState(() => loadSaved(`${STORAGE_KEY}:name`, "Meu primeiro filtro"));
   const [activeTab, setActiveTab] = useState<"visual" | "codigo">("visual");
   const [previewRuleIndex, setPreviewRuleIndex] = useState(0);
+  const [selectedPresetId, setSelectedPresetId] = useState(POE1_PRESETS[0].id);
+  const selectedPreset = POE1_PRESETS.find(preset => preset.id === selectedPresetId) ?? POE1_PRESETS[0];
   const fileRef = useRef<HTMLInputElement>(null);
   const parsed = useMemo(() => parseFilter(source), [source]);
   const rules = parsed.lines.filter((line): line is Rule => line.type === "rule");
@@ -278,6 +281,13 @@ export default function App() {
       // O editor continua funcional mesmo se o navegador bloquear o armazenamento local.
     }
   }, [source, filterName]);
+
+  function applyPreset() {
+    setSource(selectedPreset.source);
+    setFilterName(selectedPreset.name);
+    setPreviewRuleIndex(0);
+    setActiveTab("visual");
+  }
 
   function download() {
     const blob = new Blob([source], { type: "text/plain;charset=utf-8" });
@@ -392,6 +402,19 @@ export default function App() {
               <button className={activeTab === "codigo" ? "tab active" : "tab"} onClick={() => setActiveTab("codigo")}>Código</button>
             </div>
           </div>
+          <section className="preset-library" aria-label="Filtros pré-carregados">
+            <div className="preset-heading">
+              <div><span className="panel-kicker">BIBLIOTECA DE PRESETS</span><h3>Comece com um filtro pronto</h3></div>
+              <div className="preset-controls">
+                <select aria-label="Selecionar filtro pré-carregado" value={selectedPresetId} onChange={event => setSelectedPresetId(event.target.value)}>
+                  {POE1_PRESETS.map(preset => <option key={preset.id} value={preset.id}>{preset.name} · {preset.level}</option>)}
+                </select>
+                <button className="button primary" onClick={applyPreset}>Carregar preset</button>
+              </div>
+            </div>
+            <p>{selectedPreset.description}</p>
+            <small>{selectedPreset.useCase} Ao carregar, o conteúdo atual do editor será substituído; depois, você poderá personalizar e exportar.</small>
+          </section>
           {activeTab === "codigo" ? (
             <div className="code-wrap">
               <div className="code-toolbar"><span>● SINTAXE DE FILTRO POE1</span><span>{source.split("\n").length} linhas</span></div>
