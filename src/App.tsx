@@ -105,7 +105,7 @@ function replaceRule(source: string, ruleIndex: number, transform: (rule: Rule) 
   return serializeFilter(next);
 }
 
-function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete }: {
+function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete, onPreview, selected }: {
   rule: Rule;
   index: number;
   total: number;
@@ -113,6 +113,8 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete 
   onMove: (direction: -1 | 1) => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  onPreview: () => void;
+  selected: boolean;
 }) {
   const [condition, setCondition] = useState(POE1_CONDITIONS[0]?.name ?? "Class");
   const [conditionOperator, setConditionOperator] = useState("=");
@@ -169,10 +171,11 @@ function RuleCard({ rule, index, total, onChange, onMove, onDuplicate, onDelete 
   }
 
   return (
-    <article className="rule-card">
+    <article className={selected ? "rule-card selected" : "rule-card"}>
       <div className="rule-card-head">
         <span className={`rule-type ${rule.kind.toLowerCase()}`}>{rule.kind}</span>
         <span className="rule-number">REGRA {String(index + 1).padStart(2, "0")}</span>
+        <button className="preview-rule-button" onClick={onPreview} aria-pressed={selected}>{selected ? "Prévia ativa" : "Ver prévia"}</button>
         <div className="rule-tools">
           <button title="Mover para cima" aria-label="Mover regra para cima" disabled={index === 0} onClick={() => onMove(-1)}>↑</button>
           <button title="Mover para baixo" aria-label="Mover regra para baixo" disabled={index === total - 1} onClick={() => onMove(1)}>↓</button>
