@@ -76,6 +76,11 @@ function getRulePreview(rule?: Rule): RulePreview {
     if (icon) preview.minimap = { size: Number(icon[1]), color: icon[2], shape: icon[3] };
     const effect = value.match(/^PlayEffect\s+(\w+)/i);
     if (effect) preview.effect = effect[1];
+    const sound = value.match(/^PlayAlertSound(?:Positional)?\s+(\d+)\s+(\d+)/i);
+    if (sound) preview.sound = { id: Number(sound[1]), volume: Number(sound[2]) };
+    if (/^DisableDropSound\b/i.test(value)) preview.dropSound = "Som padrão desativado";
+    if (/^EnableDropSound\b/i.test(value)) preview.dropSound = "Som padrão ativado";
+    if (/^(?:Class|BaseType|Rarity|ItemLevel|DropLevel|AreaLevel|GemLevel|MapTier|Quality|Sockets|LinkedSockets|StackSize|Identified|Corrupted|Elder|Shaper|Fractured|Synthesised|Mirrored|Influence|HasExplicitMod)\b/i.test(value)) preview.conditionSummary.push(value);
     const base = value.match(/^BaseType\s+(?:=\s*)?"([^"]+)"/i);
     const itemClass = value.match(/^Class\s+(?:=\s*)?"?([^"]+?)"?$/i);
     const rarity = value.match(/^Rarity\s+(?:=\s*)?(Normal|Magic|Rare|Unique)/i);
