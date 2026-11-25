@@ -40,6 +40,10 @@ type RulePreview = {
   itemName: string;
   minimap?: { size: number; color: string; shape: string };
   effect?: string;
+  sound?: { id: number; volume: number };
+  dropSound?: string;
+  ruleKind: RuleKind | "DEFAULT";
+  conditionSummary: string[];
 };
 
 function getRulePreview(rule?: Rule): RulePreview {
@@ -49,6 +53,8 @@ function getRulePreview(rule?: Rule): RulePreview {
     backgroundColor: "rgba(18, 18, 15, 0.92)",
     fontSize: 18,
     itemName: "Chaos Orb",
+    ruleKind: rule?.kind ?? "DEFAULT",
+    conditionSummary: [],
   };
   if (!rule) return preview;
 
@@ -442,27 +448,53 @@ export default function App() {
           </div>
         </section>
 
-        <aside className="preview-panel">
-          <div className="panel-kicker">PRÉVIA EM TEMPO REAL</div><h2>Aparência da regra</h2>
-          <p className="preview-desc">{previewRule ? `Visualização da regra ${previewRuleIndex + 1}. Selecione “Ver prévia” em outra regra para comparar.` : "Adicione uma regra para visualizar sua aparência."}</p>
-          <div className="game-preview">
-            <div className="preview-scene">
-              <span className="scene-label">WRAECLAST · ITEM DROP</span>
-              {rulePreview.effect && <span className={`preview-beam effect-${rulePreview.effect.toLowerCase()}`}>{rulePreview.effect} effect</span>}
-              <div className="loot-item live-loot" style={{ color: rulePreview.textColor, borderColor: rulePreview.borderColor, backgroundColor: rulePreview.backgroundColor, fontSize: `${rulePreview.fontSize}px` }}>
-                {rulePreview.minimap && rulePreview.minimap.size >= 0 && <i className="preview-minimap" title={`MinimapIcon ${rulePreview.minimap.size} ${rulePreview.minimap.color} ${rulePreview.minimap.shape}`}>◆</i>}
-                <b>{rulePreview.itemName}</b>
-              </div>
+        <aside className="preview-panel preview-panel-expanded">
+          <div className="panel-kicker">SIMULADOR VISUAL · POE1</div>
+          <h2>Como o loot vai aparecer</h2>
+          <p className="preview-desc">{previewRule ? `Regra ${previewRuleIndex + 1} selecionada · ${rulePreview.ruleKind}. A amostra principal recebe as ações visuais desta regra.` : "Selecione uma regra para aplicar suas configurações à amostra principal."}</p>
+          <div className="preview-mode-row"><span className="preview-mode-tag">CENA DE DROP</span><span className="preview-mode-note">Representação ilustrativa · não é captura do jogo</span></div>
+          <div className="game-preview expanded-game-preview">
+            <div className="preview-scene expanded-preview-scene">
+              <span className="scene-label">WRAECLAST · SIMULAÇÃO DE CHÃO</span>
+              <span className="scene-coordinate">MAPA TIER 16 · COMBATE ENCERRADO</span>
+              <div className="scene-ground-grid" />
+              <div className="scene-drop drop-currency"><span className="drop-shadow" /><div className="loot-item sample-loot" style={{color:rulePreview.textColor,borderColor:rulePreview.borderColor,backgroundColor:rulePreview.backgroundColor,fontSize:`${Math.min(rulePreview.fontSize,24)}px`}}>{rulePreview.minimap && rulePreview.minimap.size >= 0 && <i className="preview-minimap">{rulePreview.minimap.shape === "Star" ? "★" : "◆"}</i>}<b>{rulePreview.itemName}</b></div></div>
+              <div className="scene-drop drop-unique"><div className="loot-item sample-loot unique-sample"><i>◆</i><b>Headhunter</b></div></div>
+              <div className="scene-drop drop-map"><div className="loot-item sample-loot map-sample"><i>⬟</i><b>Conqueror's Map</b></div></div>
+              <div className="scene-drop drop-gem"><div className="loot-item sample-loot gem-sample"><i>✦</i><b>Empower Support</b></div></div>
+              <div className="scene-drop drop-card"><div className="loot-item sample-loot card-sample"><i>▤</i><b>The Apothecary</b></div></div>
+              <div className="scene-drop drop-rare"><div className="loot-item sample-loot rare-sample"><i>◇</i><b>Vaal Regalia</b></div></div>
+              {rulePreview.effect && rulePreview.effect !== "None" && <span className={`preview-beam expanded-beam effect-${rulePreview.effect.toLowerCase()}`}>{rulePreview.effect.toUpperCase()} · PLAYEFFECT</span>}
+              {rulePreview.sound && <span className="scene-sound-indicator">♫ ALERT SOUND {rulePreview.sound.id} · {rulePreview.sound.volume}%</span>}
             </div>
           </div>
-          <div className="preview-specs">
-            <span><i style={{background:rulePreview.textColor}} /> Texto</span>
-            <span><i style={{background:rulePreview.borderColor}} /> Borda</span>
-            <span><i style={{background:rulePreview.backgroundColor}} /> Fundo</span>
-            <span>Fonte: {rulePreview.fontSize}px</span>
-            {rulePreview.minimap && <span>Minimapa: {rulePreview.minimap.color} · {rulePreview.minimap.shape}</span>}
+          <div className="preview-inspector-grid">
+            <section className="preview-inspector">
+              <div className="inspector-title">ESTILO DO RÓTULO</div>
+              <div className="inspector-label-demo" style={{color:rulePreview.textColor,borderColor:rulePreview.borderColor,backgroundColor:rulePreview.backgroundColor,fontSize:`${Math.min(rulePreview.fontSize,22)}px`}}>{rulePreview.itemName}</div>
+              <div className="inspector-swatches"><span><i style={{background:rulePreview.textColor}}/>Texto</span><span><i style={{background:rulePreview.borderColor}}/>Borda</span><span><i style={{background:rulePreview.backgroundColor}}/>Fundo</span></div>
+              <div className="inspector-meta"><span>Fonte</span><b>{rulePreview.fontSize} · escala do jogo</b></div>
+              <div className="inspector-meta"><span>Bloco</span><b>{rulePreview.ruleKind}</b></div>
+            </section>
+            <section className="preview-inspector">
+              <div className="inspector-title">MINIMAPA</div>
+              <div className="minimap-demo"><div className="minimap-crosshair"/><span className={`minimap-marker marker-${(rulePreview.minimap?.color ?? "yellow").toLowerCase()}`}>{rulePreview.minimap?.shape === "Star" ? "★" : rulePreview.minimap?.shape === "Diamond" ? "◆" : rulePreview.minimap?.shape === "Circle" ? "●" : rulePreview.minimap?.shape === "Square" ? "■" : "▲"}</span><small>ÍCONE DO DROP</small></div>
+              <div className="inspector-meta"><span>Ícone</span><b>{rulePreview.minimap ? `${rulePreview.minimap.size} · ${rulePreview.minimap.color} · ${rulePreview.minimap.shape}` : "Não configurado"}</b></div>
+            </section>
+            <section className="preview-inspector">
+              <div className="inspector-title">ÁUDIO E EFEITOS</div>
+              <div className="effect-demo"><span className={`effect-orb ${rulePreview.effect ? "orb-"+rulePreview.effect.toLowerCase() : ""}`}>✦</span><div><b>{rulePreview.effect ?? "Sem feixe"}</b><small>{rulePreview.effect ? "PlayEffect · efeito temporário" : "PlayEffect não configurado"}</small></div></div>
+              <div className="inspector-meta"><span>Alerta sonoro</span><b>{rulePreview.sound ? `Som ${rulePreview.sound.id} · volume ${rulePreview.sound.volume}` : "Não configurado"}</b></div>
+              <div className="inspector-meta"><span>Som padrão</span><b>{rulePreview.dropSound ?? "Comportamento padrão"}</b></div>
+            </section>
           </div>
-          <div className="preview-tip"><b>Prévia ilustrativa</b><p>A imagem representa as ações visuais configuradas na regra selecionada. A correspondência real de itens e a renderização exata do jogo ainda dependem da validação no PoE1.</p></div>
+          <section className="preview-rule-inspector">
+            <div className="inspector-title">O QUE ESTA REGRA ESTÁ FAZENDO</div>
+            <div className="preview-rule-summary"><span className={`rule-summary-kind ${rulePreview.ruleKind.toLowerCase()}`}>{rulePreview.ruleKind}</span><span>{rulePreview.conditionSummary.length ? rulePreview.conditionSummary.join(" · ") : "Nenhuma condição reconhecida na amostra"}</span></div>
+            <div className="preview-capabilities"><span>✓ Texto e tamanho</span><span>✓ Cor da borda</span><span>✓ Cor e transparência do fundo</span><span>✓ Som de alerta</span><span>✓ Feixe colorido</span><span>✓ Ícone no minimapa</span><span>✓ Prioridade pela ordem das regras</span></div>
+          </section>
+          <div className="preview-sample-legend"><b>OUTROS TIPOS DE DROP NA CENA</b><span><i className="legend-dot currency-dot"/> Moeda</span><span><i className="legend-dot unique-dot"/> Único</span><span><i className="legend-dot rare-dot"/> Raro / base</span><span><i className="legend-dot map-dot"/> Mapa</span><span><i className="legend-dot gem-dot"/> Gema</span><span><i className="legend-dot card-dot"/> Carta</span></div>
+          <div className="preview-tip"><b>Limite técnico da prévia</b><p>A cena é uma simulação de interface, não reproduz o motor gráfico nem os sons originais do Path of Exile. O editor lê as diretivas reconhecidas do filtro; filtros importados podem conter condições e ações ainda não interpretadas pela prévia. A aparência final, os ícones e os alertas devem ser conferidos no jogo.</p></div>
         </aside>
       </section>
       <footer><span>POE FILTER FORGE <i>·</i> FEITO PARA A COMUNIDADE</span><span>Path of Exile é uma marca da Grinding Gear Games.</span></footer>
