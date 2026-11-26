@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-11-26T10:04:54.890Z",
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-26T10:18:39.130Z",
   "league": {
     "id": "Covens",
     "name": "Covens"
@@ -10776,6 +10776,118 @@
             "tradeId": "primordial-exalted-orb"
           }
         ]
+      }
+    },
+    "essence": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "fossil": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "resonator": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "oil": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "divinationcard": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "deliriumorb": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "thread": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "tattoo": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "omen": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "runegraft": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "allflameember": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "artifact": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "astrolabe": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "djinncoin": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "ducat": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
+      }
+    },
+    "enshroudingcrystal": {
+      "etag": "W/05883a6f773c0ee8fff2cb71173480a3",
+      "data": {
+        "lines": [],
+        "currencyDetails": []
       }
     }
   }
