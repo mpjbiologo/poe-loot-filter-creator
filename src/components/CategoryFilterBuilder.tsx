@@ -73,7 +73,6 @@ export default function CategoryFilterBuilder({ source, setSource }: Props) {
   const [query,setQuery] = useState("");
   const [selected,setSelected] = useState<string>("");
   const [settings,setSettings] = useState<Record<string,Setting>>({});
-  const [showAdvanced,setShowAdvanced] = useState(false);
   const [notice,setNotice] = useState("");
   const [bulkMode,setBulkMode] = useState<"show"|"hide">("show");
   const [bulkSound,setBulkSound] = useState(0);
