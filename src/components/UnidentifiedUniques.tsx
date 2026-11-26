@@ -69,7 +69,7 @@ export default function UnidentifiedUniques({ source, setSource }: Props) {
   }
 
   function addRules() {
-    if (!allUniques && classes.length === 0 && bases.length === 0) {
+    if (!allUniques && classes.length === 0 && (!baseStyle || bases.length === 0)) {
       setStatus("Selecione todos os únicos, uma ou mais classes ou informe bases prioritárias.");
       return;
     }
