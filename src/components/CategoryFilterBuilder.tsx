@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 type Item = { id: string; name: string; category: string; chaosValue?: number; baseType?: string; className?: string; base?: boolean };
 type Setting = { mode: "default" | "show" | "hide"; text: string; border: string; background: string; font: number; sound: number; volume: number; effect: string; mapColor: string; mapShape: string; mapSize: number; minLevel: string; sockets: string; links: string; socketGroup: string };
-type Snapshot = { generatedAt?: string; league?: { id: string; name: string }; items?: { id: string; name: string; chaosValue: number; category: string }[] };
+type Snapshot = { generatedAt?: string; league?: { id: string; name: string }; items?: { id: string; name: string; chaosValue?: number; category: string; baseType?: string }[] };
 type Props = { source: string; setSource: (value: string) => void };
 
 const SNAPSHOT_URL = "https://raw.githubusercontent.com/mpjbiologo/poe-loot-filter-creator/market-data/poe-ninja-market.json";
@@ -108,7 +108,7 @@ export default function CategoryFilterBuilder({ source, setSource }: Props) {
     if (active === "base") return BASE_CLASSES.map(name => ({id:"base:"+name,name,category:"Base",className:name,base:true}));
     if (active === "unique") return BASE_CLASSES.filter(name => !["Quivers","Tinctures"].includes(name)).map(name => ({id:"unique:"+name,name:"Únicos não identificados · "+name,category:"Unique",className:name}));
     const type = category[2];
-    const live = snapshot?.items?.filter(item => item.category === type).map(item => ({...item,category:type})) ?? [];
+    const live = snapshot?.items?.filter(item => item.category === type).map(item => ({...item,category:type,base:type==="BaseType"})) ?? [];
     const staticItems = (STATIC[type] ?? []).map(name => ({id:type+":"+name,name,category:type}));
     const merged = new Map<string,Item>();
     [...staticItems,...live].forEach(item => merged.set(item.name.toLowerCase(),item));
@@ -141,7 +141,7 @@ export default function CategoryFilterBuilder({ source, setSource }: Props) {
       else if (cat[0] === "unique") BASE_CLASSES.filter(name => !["Quivers","Tinctures"].includes(name)).forEach(name => itemMap.set("unique:"+name,{id:"unique:"+name,name:"Únicos não identificados · "+name,category:"Unique",className:name}));
       else {
         (STATIC[cat[2]] ?? []).forEach(name => itemMap.set(cat[2]+":"+name,{id:cat[2]+":"+name,name,category:cat[2]}));
-        snapshot?.items?.filter(item => item.category === cat[2]).forEach(item => itemMap.set(item.id,{...item,category:cat[2]}));
+        snapshot?.items?.filter(item => item.category === cat[2]).forEach(item => itemMap.set(item.id,{...item,category:cat[2],base:cat[2]==="BaseType"}));
       }
     });
     const rules = configured.map(([id,setting]) => {
