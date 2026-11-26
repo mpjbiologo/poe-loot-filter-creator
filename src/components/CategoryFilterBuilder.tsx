@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-type Item = { id: string; name: string; category: string; chaosValue?: number; className?: string; base?: boolean };
+type Item = { id: string; name: string; category: string; chaosValue?: number; baseType?: string; className?: string; base?: boolean };
 type Setting = { mode: "default" | "show" | "hide"; text: string; border: string; background: string; font: number; sound: number; volume: number; effect: string; mapColor: string; mapShape: string; mapSize: number; minLevel: string; sockets: string; links: string; socketGroup: string };
 type Snapshot = { generatedAt?: string; league?: { id: string; name: string }; items?: { id: string; name: string; chaosValue: number; category: string }[] };
 type Props = { source: string; setSource: (value: string) => void };
@@ -11,8 +11,18 @@ const CATEGORIES = [
   ["fossil","Fósseis","Fossil"],["resonator","Ressonadores","Resonator"],["oil","Óleos","Oil"],
   ["card","Cartas divinatórias","DivinationCard"],["delirium","Orbes delirium","DeliriumOrb"],["thread","Threads","Thread"],
   ["tattoo","Tatuagens","Tattoo"],["omen","Presságios","Omen"],["runegraft","Runegrafts","Runegraft"],
-  ["allflame","Brasas Allflame","AllflameEmber"],["map","Mapas e convites","Map"],["gem","Gemas","Gem"],
-  ["unique","Itens únicos","Unique"],["base","Bases de equipamento","Base"],["special","Itens especiais","Special"],
+  ["allflame","Brasas Allflame","AllflameEmber"],["djinncoin","Moedas Djinn","DjinnCoin"],["ducat","Ducats","Ducat"],
+  ["crystal","Cristais Enshrouding","EnshroudingCrystal"],["artifact","Artefatos","Artifact"],["astrolabe","Astrolábios","Astrolabe"],
+  ["map","Mapas","Map"],["blightedmap","Mapas Blighted","BlightedMap"],["blightravagedmap","Mapas Blight-ravaged","BlightRavagedMap"],
+  ["uniquemap","Mapas únicos","UniqueMap"],["valdomap","Mapas de Valdo","ValdoMap"],["invitation","Convites","Invitation"],
+  ["memory","Memórias","Memory"],["temple","Templos","IncursionTemple"],["scryingorb","Orbes de vidência","ScryingOrb"],
+  ["unique","Únicos não identificados","Unique"],["uniqueweapon","Armas únicas","UniqueWeapon"],["uniquearmour","Armaduras únicas","UniqueArmour"],
+  ["uniqueaccessory","Acessórios únicos","UniqueAccessory"],["uniqueflask","Frascos únicos","UniqueFlask"],["uniquejewel","Joias únicas","UniqueJewel"],
+  ["forbiddenjewel","Joias proibidas","ForbiddenJewel"],["shrinebelt","Cintos de santuário","ShrineBelt"],["uniquetincture","Tinturas únicas","UniqueTincture"],
+  ["uniquerelic","Relíquias únicas","UniqueRelic"],["skillgem","Gemas de habilidade","SkillGem"],["imbuedgem","Gemas imbuidas","ImbuedGem"],
+  ["clusterjewel","Joias cluster","ClusterJewel"],["base","Bases de equipamento","BaseType"],["flask","Frascos","Flask"],
+  ["incubator","Incubadoras","Incubator"],["wombgift","Wombgifts","Wombgift"],["corpse","Cadáveres","Corpse"],
+  ["viscera","Vísceras","Viscera"],["beast","Bestas","Beast"],["vial","Viais","Vial"],
 ] as const;
 
 const STATIC: Record<string, string[]> = {
@@ -44,7 +54,7 @@ function settingKey(item: Item) { return item.id; }
 function buildRule(item: Item, setting: Setting): string {
   const conditions = item.className
     ? item.id.startsWith("unique:") ? ['Rarity Unique','Identified False','Class ' + quote(item.className)] : ['Class ' + quote(item.className)]
-    : ['BaseType ' + quote(item.name)];
+    : ['BaseType ' + quote(item.baseType ?? item.name)];
   if (item.id.startsWith("unique:")) {
     if (setting.minLevel) conditions.push('ItemLevel >= ' + setting.minLevel);
   } else if (setting.minLevel) conditions.push('ItemLevel >= ' + setting.minLevel);
