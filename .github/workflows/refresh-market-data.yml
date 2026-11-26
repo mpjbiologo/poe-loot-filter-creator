@@ -59,47 +59,95 @@ jobs:
           if (!Array.isArray(leagues) || leagues.length === 0) throw new Error("poe.ninja não retornou ligas ativas.");
           const league = leagues.find(entry => /covens/i.test(entry.id + " " + entry.name)) ?? leagues[0];
 
-          const base = "https://poe.ninja/poe1/api/economy/stash/current/currency/overview";
-          // Tipos negociáveis atuais do PoE1. Scarab foi removido do jogo e não entra no catálogo.
-          // Tipos não suportados pela API são ignorados; o editor mantém seu catálogo local como fallback.
-          const marketTypes = [
-            "Currency","Fragment","Essence","Fossil","Resonator","Oil","DivinationCard",
-            "DeliriumOrb","Thread","Tattoo","Omen","Runegraft","AllflameEmber",
-            "Artifact","Astrolabe","DjinnCoin","Ducat","EnshroudingCrystal"
-          ];
-          const responses = await Promise.all(marketTypes.map(async type => {
-            try {
-              const response = await getJson(type.toLowerCase(), base + "?league=" + encodeURIComponent(league.id) + "&type=" + encodeURIComponent(type));
-              return [type, response];
-            } catch (error) {
-              console.log("Tipo não disponível nesta API/ligação: " + type + " · " + error.message);
-              return [type, null];
-            }
-          }));
+          const leagueParam = "?league=" + encodeURIComponent(league.id) + "&type=";
+          const currencyBase = "https://poe.ninja/poe1/api/economy/stash/current/currency/overview";
+          const exchangeBase = "https://poe.ninja/poe1/api/economy/exchange/current/overview";
+          const itemBase = "https://poe.ninja/poe1/api/economy/stash/current/item/overview";
 
-          const apiResponses = { leagues: leaguesResponse };
+          const exchangeTypes = [
+            "Runegraft","AllflameEmber","Tattoo","Omen","DjinnCoin","Ducat","EnshroudingCrystal",
+            "DivinationCard","Artifact","Oil","DeliriumOrb","Astrolabe","Thread","Fossil","Resonator","Essence"
+          ];
+          const itemTypes = [
+            "Wombgift","Corpse","Viscera","Incubator","UniqueWeapon","UniqueArmour","UniqueAccessory",
+            "UniqueFlask","UniqueJewel","ForbiddenJewel","ShrineBelt","UniqueTincture","UniqueRelic",
+            "SkillGem","ImbuedGem","ClusterJewel","Map","BlightedMap","BlightRavagedMap","UniqueMap",
+            "ValdoMap","Invitation","Memory","IncursionTemple","ScryingOrb","BaseType","Flask","Beast","Vial"
+          ];
+          const requests = [
+            ...["Currency","Fragment"].map(type => ({ type, endpoint: currencyBase, kind: "currency" })),
+            ...exchangeTypes.map(type => ({ type, endpoint: exchangeBase, kind: "exchange" })),
+            ...itemTypes.map(type => ({ type, endpoint: itemBase, kind: "item" }))
+          ];
+          const responses = [];
+          // Limita concorrência para respeitar a API pública do poe.ninja.
+          for (let offset = 0; offset < requests.length; offset += 4) {
+            const batch = await Promise.all(requests.slice(offset, offset + 4).map(async request => {
+              const key = request.type.toLowerCase();
+              try {
+                const response = await getJson(key, request.endpoint + leagueParam + encodeURIComponent(request.type));
+                return { ...request, response };
+              } catch (error) {
+                console.log("Categoria não disponível nesta atualização: " + request.type + " · " + error.message);
+                return { ...request, response: null };
+              }
+            }));
+            responses.push(...batch);
+          }
+
           const items = [];
-          for (const [category, response] of responses) {
-            if (!response?.data?.lines) continue;
-            apiResponses[category.toLowerCase()] = response;
-            for (const line of response.data.lines) {
-              const name = line.currencyTypeName ?? line.name ?? line.itemType;
-              const chaosValue = Number(line.chaosEquivalent ?? line.chaosValue) || 0;
-              if (!name) continue;
-              items.push({ id: category + ":" + name, name, chaosValue, category });
+          const apiResponses = { leagues: leaguesResponse };
+          for (const entry of responses) {
+            if (!entry.response?.data) continue;
+            const data = entry.response.data;
+            apiResponses[entry.type.toLowerCase()] = entry.response;
+            if (entry.kind === "currency") {
+              for (const line of data.lines ?? []) {
+                const name = line.currencyTypeName;
+                if (name) items.push({
+                  id: entry.type + ":" + name, name,
+                  chaosValue: Number(line.chaosEquivalent) || 0, category: entry.type
+                });
+              }
+            } else if (entry.kind === "exchange") {
+              const metadata = new Map((data.core?.items ?? []).map(item => [String(item.id), item]));
+              for (const line of data.lines ?? []) {
+                const detail = metadata.get(String(line.id));
+                const name = detail?.name ?? line.name;
+                if (!name) continue;
+                const primary = String(data.core?.primary ?? "").toLowerCase();
+                items.push({
+                  id: entry.type + ":" + name, name,
+                  ...(primary.includes("chaos") ? { chaosValue: Number(line.primaryValue) || 0 } : {}),
+                  category: entry.type
+                });
+              }
+            } else {
+              for (const line of data.lines ?? []) {
+                const name = line.name ?? line.baseType;
+                if (!name) continue;
+                items.push({
+                  id: entry.type + ":" + name + ":" + (line.baseType ?? ""),
+                  name, baseType: line.baseType,
+                  ...(Number.isFinite(Number(line.chaosValue)) ? { chaosValue: Number(line.chaosValue) } : {}),
+                  category: entry.type
+                });
+              }
             }
           }
-          items.sort((a, b) => b.chaosValue - a.chaosValue);
+          const uniqueItems = new Map();
+          for (const item of items) uniqueItems.set(item.id, item);
+          const sortedItems = [...uniqueItems.values()].sort((a, b) => (b.chaosValue ?? 0) - (a.chaosValue ?? 0));
 
           const snapshot = {
-            schemaVersion: 2,
+            schemaVersion: 3,
             generatedAt: new Date().toISOString(),
             league: { id: league.id, name: league.name },
-            items,
+            items: sortedItems,
             apiResponses
           };
           writeFileSync(file, JSON.stringify(snapshot, null, 2) + "\n");
-          console.log(`Snapshot atualizado: ${items.length} itens · ${league.name}`);
+          console.log(`Snapshot atualizado: ${sortedItems.length} itens · ${league.name}`);
           NODE
       - name: Publish snapshot to market-data branch
         run: |
