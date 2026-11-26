@@ -3,6 +3,7 @@ import { parseFilter, serializeFilter, type FilterLine, type RuleKind } from "./
 import { POE1_ACTIONS, POE1_CONDITIONS } from "./engine/catalog";
 import { POE1_PRESETS } from "./engine/presets";
 import MarketValuables from "./components/MarketValuables";
+import UnidentifiedUniques from "./components/UnidentifiedUniques";
 
 const STORAGE_KEY = "poe-filter-forge-project-v1";
 
@@ -428,6 +429,7 @@ export default function App() {
             <small>{selectedPreset.useCase} Ao carregar, o conteúdo atual do editor será substituído; depois, você poderá personalizar e exportar.</small>
           </section>
           <MarketValuables source={source} setSource={setSource} />
+          <UnidentifiedUniques source={source} setSource={setSource} />
           {activeTab === "codigo" ? (
             <div className="code-wrap">
               <div className="code-toolbar"><span>● SINTAXE DE FILTRO POE1</span><span>{source.split("\n").length} linhas</span></div>
