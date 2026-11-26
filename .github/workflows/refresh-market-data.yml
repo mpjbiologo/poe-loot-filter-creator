@@ -47,8 +47,13 @@ jobs:
             const requestHeaders = { ...headers };
             if (previousResponses[key]?.etag) requestHeaders["If-None-Match"] = previousResponses[key].etag;
             const response = await fetch(url, { headers: requestHeaders });
-            if (response.status === 304 && previousResponses[key]?.data) {
-              return previousResponses[key];
+            if (response.status === 304 && previousResponses[key]?.items) {
+              return { etag: previousResponses[key].etag, cachedItems: previousResponses[key].items };
+            }
+            if (response.status === 304) {
+              const retry = await fetch(url, { headers });
+              if (!retry.ok) throw new Error(`poe.ninja ${key}: HTTP ${retry.status}`);
+              return { etag: retry.headers.get("etag"), data: await retry.json() };
             }
             if (!response.ok) throw new Error(`poe.ninja ${key}: HTTP ${response.status}`);
             return { etag: response.headers.get("etag"), data: await response.json() };
@@ -99,12 +104,17 @@ jobs:
           const apiResponses = { leagues: leaguesResponse };
           for (const entry of responses) {
             if (!entry.response?.data) continue;
+            if (entry.response.cachedItems) {
+              apiResponses[entry.type.toLowerCase()] = { etag: entry.response.etag, items: entry.response.cachedItems };
+              items.push(...entry.response.cachedItems);
+              continue;
+            }
             const data = entry.response.data;
-            apiResponses[entry.type.toLowerCase()] = entry.response;
+            const normalized = [];
             if (entry.kind === "currency") {
               for (const line of data.lines ?? []) {
                 const name = line.currencyTypeName;
-                if (name) items.push({
+                if (name) normalized.push({
                   id: entry.type + ":" + name, name,
                   chaosValue: Number(line.chaosEquivalent) || 0, category: entry.type
                 });
@@ -116,7 +126,7 @@ jobs:
                 const name = detail?.name ?? line.name;
                 if (!name) continue;
                 const primary = String(data.core?.primary ?? "").toLowerCase();
-                items.push({
+                normalized.push({
                   id: entry.type + ":" + name, name,
                   ...(primary.includes("chaos") ? { chaosValue: Number(line.primaryValue) || 0 } : {}),
                   category: entry.type
@@ -126,7 +136,7 @@ jobs:
               for (const line of data.lines ?? []) {
                 const name = line.name ?? line.baseType;
                 if (!name) continue;
-                items.push({
+                normalized.push({
                   id: entry.type + ":" + name + ":" + (line.baseType ?? ""),
                   name, baseType: line.baseType,
                   ...(Number.isFinite(Number(line.chaosValue)) ? { chaosValue: Number(line.chaosValue) } : {}),
@@ -134,6 +144,8 @@ jobs:
                 });
               }
             }
+            apiResponses[entry.type.toLowerCase()] = { etag: entry.response.etag, items: normalized };
+            items.push(...normalized);
           }
           const uniqueItems = new Map();
           for (const item of items) uniqueItems.set(item.id, item);
